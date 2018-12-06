@@ -15,17 +15,25 @@
   (and (= (Character/toLowerCase left) (Character/toLowerCase right))
        (not (= (Character/isLowerCase left) (Character/isLowerCase right)))))
 
-(defn react [sb]
+(defn react [^StringBuilder sb c]
   (let [l (.length sb)]
-    (if (and (> l 1) (different-case-same-letter
-    (vec (drop-last 2 stack))
-    str))
+    (if (and (> l 0) (different-case-same-letter (.charAt sb (dec l)) c))
+      (.deleteCharAt sb (dec l))
+      (.append sb c))))
 
 (defn process [input]
-  (reduce #(react (.append %1 %2)) (StringBuilder.) input))
+  (reduce #(react %1 %2) (StringBuilder.) input))
 
 (deftest part-one-test
   (is (= "dabCBAcaDA" (apply str (process "dabAcCaCBAcCcaDA")))))
 
 (defn part-one []
   (count (process input)))
+
+;; i tried to think about decomposing it but then i just wrote it
+;; sorry/not sorry
+(defn part-two []
+  (apply min-key second
+       (for [c "abcdefghijklmnopqrstuvwxyz"]
+         (let [C (Character/toUpperCase c)]
+           [c (count (process (filter #(and (not= c %) (not= C %)) input)))]))))
