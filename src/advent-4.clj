@@ -49,12 +49,22 @@
 (defn create-schedules [input]
   (:result (reduce log-reducer { :result {} } (map parse input))))
 
+(defn guard-sleep-totals [input]
+  (->> input
+       create-schedules
+       (reduce-kv #(assoc %1 %2 (reduce + %3)) {})))
+
 (defn find-longest-asleep [input]
-  (let [schedules (create-schedules input)
-        total-asleep (reduce-kv #(assoc %1 %2 (reduce + %3)) {} schedules)
+  (let [total-asleep (guard-sleep-totals input)
         max-asleep-guard (first (apply max-key val total-asleep))
         max-asleep-minute (first (apply max-key second (map-indexed vector (schedules max-asleep-guard))))]
     (* max-asleep-guard max-asleep-minute)))
 
 (defn part-one []
   (find-longest-asleep input))
+
+
+(defn find-most-frequent-same-minute [input]
+  (let [schedules (create-schedules input)]
+    (map #([%1 (apply max-key second (map-indexed vector %2))]) schedules))) 
+        
